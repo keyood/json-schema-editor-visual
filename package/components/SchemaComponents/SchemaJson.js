@@ -15,28 +15,50 @@ import {
   Tooltip
 } from 'antd';
 import FieldInput from './FieldInput'
-
-const FormItem = Form.Item;
-const Option = Select.Option;
-const { TextArea } = Input;
-import './schemaJson.css';
 import _ from 'underscore';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { JSONPATH_JOIN_CHAR, SCHEMA_TYPE } from '../../utils.js';
-const InputGroup = Input.Group;
 import LocaleProvider from '../LocalProvider/index.js';
-import utils from '../../utils';
 import MockSelect from '../MockSelect/index.js';
+import './schemaJson.css';
 
-const mapping = (name, data, showEdit, showAdv) => {
+const FormItem = Form.Item;
+const Option = Select.Option;
+const { TextArea } = Input;
+const InputGroup = Input.Group;
+
+  const mapping = props => {
+  const { name, data, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = props
   switch (data.type) {
     case 'array':
-      return <SchemaArray prefix={name} data={data} showEdit={showEdit} showAdv={showAdv} />;
+      return (
+        <SchemaArray
+          prefix={name}
+          data={data}
+          showEdit={showEdit}
+          showAdv={showAdv}
+          checkedTip={checkedTip}
+          radio={radio}
+          readOnly={readOnly}
+          noDescription={noDescription}
+        />
+      );
       break;
     case 'object':
       let nameArray = [].concat(name, 'properties');
-      return <SchemaObject prefix={nameArray} data={data} showEdit={showEdit} showAdv={showAdv} />;
+      return (
+        <SchemaObject
+          prefix={nameArray}
+          data={data}
+          showEdit={showEdit}
+          showAdv={showAdv}
+          checkedTip={checkedTip}
+          radio={radio}
+          readOnly={readOnly}
+          noDescription={noDescription}
+        />
+      );
       break;
     default:
       return null;
@@ -110,18 +132,36 @@ class SchemaArray extends PureComponent {
   };
 
   render() {
-    const { data, prefix, showEdit, showAdv } = this.props;
+    const { data, prefix, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = this.props;
     const items = data.items;
     let prefixArray = [].concat(prefix, 'items');
 
     let prefixArrayStr = [].concat(prefixArray, 'properties').join(JSONPATH_JOIN_CHAR);
     let showIcon = this.context.getOpenValue([prefixArrayStr]);
+    // 全部都有
+    let layput = {
+      name: 10,
+      type: 3,
+      mock: 4,
+      description: 4,
+      setting: 3
+    }
+    // 无mock 
+    if (!this.context.isMock && !noDescription && !readOnly) {
+      layput.name = 12
+      layput.description = 6
+    }
+    // 无描述，无操作
+    if (this.context.isMock && noDescription && readOnly) {
+      layput.name = 12
+      layput.mock = 9
+    }
     return (
       !_.isUndefined(data.items) && (
         <div className="array-type">
           <Row className="array-item-type" type="flex" justify="space-around" align="middle">
             <Col
-              span={this.context.isMock ? 10 : 12}
+              span={layput.name}
               className="col-item name-item col-item-name"
               style={this.__tagPaddingLeftStyle}
             >
@@ -142,12 +182,13 @@ class SchemaArray extends PureComponent {
                 </Col>
               </Row>
             </Col>
-            <Col span={4} className="col-item col-item-type">
+            <Col span={layput.type} className="col-item col-item-type">
               <Select
                 name="itemtype"
                 className="type-select-style"
                 onChange={this.handleChangeType}
                 value={items.type}
+                disabled={readOnly}
               >
                 {SCHEMA_TYPE.map((item, index) => {
                   return (
@@ -159,7 +200,7 @@ class SchemaArray extends PureComponent {
               </Select>
             </Col>
             {this.context.isMock && (
-              <Col span={3} className="col-item col-item-mock">
+              <Col span={layput.mock} className="col-item col-item-mock">
                 
                 <MockSelect
                   schema={items}
@@ -168,31 +209,50 @@ class SchemaArray extends PureComponent {
                 />
               </Col>
             )}
-            <Col span={this.context.isMock ? 4 : 5} className="col-item col-item-desc">
-              <Input
-                addonAfter={<Icon type="edit" onClick={() => this.handleShowEdit('description')} />}
-                placeholder={LocaleProvider('description')}
-                value={items.description}
-                onChange={this.handleChangeDesc}
-              />
-            </Col>
-            <Col span={3} className="col-item col-item-setting">
-              <span className="adv-set" onClick={this.handleShowAdv}>
-                <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
-                  <Icon type="setting" />
-                </Tooltip>
-              </span>
+            {
+              !noDescription && (
+                <Col span={layput.description} className="col-item col-item-desc">
+                  <Input
+                    addonAfter={<Icon type="edit" onClick={() => this.handleShowEdit('description')} />}
+                    placeholder={LocaleProvider('description')}
+                    value={items.description}
+                    onChange={this.handleChangeDesc}
+                  />
+                </Col>
+              )
+            }
+            {
+              !readOnly && (
+                <Col span={3} className="col-item col-item-setting">
+                  <span className="adv-set" onClick={this.handleShowAdv}>
+                    <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
+                      <Icon type="setting" />
+                    </Tooltip>
+                  </span>
 
-              {items.type === 'object' ? (
-                <span onClick={this.handleAddChildField}>
-                  <Tooltip placement="top" title={LocaleProvider('add_child_node')}>
-                    <Icon type="plus" className="plus" />
-                  </Tooltip>
-                </span>
-              ) : null}
-            </Col>
+                  {items.type === 'object' ? (
+                    <span onClick={this.handleAddChildField}>
+                      <Tooltip placement="top" title={LocaleProvider('add_child_node')}>
+                        <Icon type="plus" className="plus" />
+                      </Tooltip>
+                    </span>
+                  ) : null}
+                </Col>
+              )
+            }
           </Row>
-          <div className="option-formStyle">{mapping(prefixArray, items, showEdit, showAdv)}</div>
+          <div className="option-formStyle">
+            {mapping({
+              name: prefixArray,
+              data: items,
+              showEdit,
+              showAdv,
+              checkedTip,
+              radio,
+              readOnly,
+              noDescription
+            })}
+          </div>
         </div>
       )
     );
@@ -202,7 +262,11 @@ class SchemaArray extends PureComponent {
 SchemaArray.contextTypes = {
   getOpenValue: PropTypes.func,
   Model: PropTypes.object,
-  isMock: PropTypes.bool
+  isMock: PropTypes.bool,
+  checkedTip: PropTypes.string,
+  radio: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  noDescription: PropTypes.bool
 };
 
 class SchemaItem extends PureComponent {
@@ -262,10 +326,10 @@ class SchemaItem extends PureComponent {
 
   // 删除节点
   handleDeleteItem = () => {
-    const { prefix, name } = this.props;
+    const { prefix, name, radio } = this.props;
     let nameArray = this.getPrefix();
     this.Model.deleteItemAction({ key: nameArray });
-    this.Model.enableRequireAction({ prefix, name, required: false });
+    this.Model.enableRequireAction({ prefix, name, required: false, radio });
   };
   /*
   展示备注编辑弹窗
@@ -300,26 +364,43 @@ class SchemaItem extends PureComponent {
 
   // 修改是否必须
   handleEnableRequire = e => {
-    const { prefix, name } = this.props;
+    const { prefix, name, radio } = this.props;
     let required = e.target.checked;
     // this.enableRequire(this.props.prefix, this.props.name, e.target.checked);
-    this.Model.enableRequireAction({ prefix, name, required });
+    this.Model.enableRequireAction({ prefix, name, required, radio });
   };
 
   render() {
-    let { name, data, prefix, showEdit, showAdv } = this.props;
+    let { name, data, prefix, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = this.props;
     let value = data.properties[name];
     let prefixArray = [].concat(prefix, name);
-
     let prefixStr = prefix.join(JSONPATH_JOIN_CHAR);
     let prefixArrayStr = [].concat(prefixArray, 'properties').join(JSONPATH_JOIN_CHAR);
     let show = this.context.getOpenValue([prefixStr]);
     let showIcon = this.context.getOpenValue([prefixArrayStr]);
+    // 全部都有
+    let layput = {
+      name: 10,
+      type: 3,
+      mock: 4,
+      description: 4,
+      setting: 3
+    }
+    // 无mock 
+    if (!this.context.isMock && !noDescription && !readOnly) {
+      layput.name = 12
+      layput.description = 6
+    }
+    // 无描述，无操作
+    if (this.context.isMock && noDescription && readOnly) {
+      layput.name = 12
+      layput.mock = 9
+    }
     return show ? (
       <div>
         <Row type="flex" justify="space-around" align="middle">
           <Col
-            span={this.context.isMock ? 10 : 12}
+            span={layput.name}
             className="col-item name-item col-item-name"
             style={this.__tagPaddingLeftStyle}
           >
@@ -338,28 +419,32 @@ class SchemaItem extends PureComponent {
               <Col span={22}>
                 <FieldInput
                   addonAfter={
-                    <Tooltip placement="top" title={LocaleProvider('required')}>
-                      <Checkbox
-                        onChange={this.handleEnableRequire}
-                        checked={
-                          _.isUndefined(data.required) ? false : data.required.indexOf(name) != -1
-                        }
-                      />
-                    </Tooltip>
+                    !readOnly && (
+                      <Tooltip placement="top" title={checkedTip || LocaleProvider('required')}>
+                        <Checkbox
+                          onChange={this.handleEnableRequire}
+                          checked={
+                            _.isUndefined(data.required) ? false : data.required.indexOf(name) != -1
+                          }
+                        />
+                      </Tooltip>
+                    )
                   }
                   onChange={this.handleChangeName}
                   value={name}
+                  disabled={readOnly}
                 />
               </Col>
             </Row>
           </Col>
 
 
-          <Col span={4} className="col-item col-item-type">
+          <Col span={3} className="col-item col-item-type">
             <Select
               className="type-select-style"
               onChange={this.handleChangeType}
               value={value.type}
+              disabled={readOnly}
             >
               {SCHEMA_TYPE.map((item, index) => {
                 return (
@@ -373,7 +458,7 @@ class SchemaItem extends PureComponent {
 
 
           {this.context.isMock && (
-            <Col span={3} className="col-item col-item-mock">
+            <Col span={layput.mock} className="col-item col-item-mock">
               {/* <Input
                 addonAfter={
                   <Icon type="edit" onClick={() => this.handleShowEdit('mock', value.type)} />
@@ -391,38 +476,54 @@ class SchemaItem extends PureComponent {
             </Col>
           )}
 
-
-          <Col span={this.context.isMock ? 4 : 5} className="col-item col-item-desc">
-            <Input
-              addonAfter={<Icon type="edit" onClick={() => this.handleShowEdit('description')} />}
-              placeholder={LocaleProvider('description')}
-              value={value.description}
-              onChange={this.handleChangeDesc}
-            />
-          </Col>
-
-          
-          <Col span={3} className="col-item col-item-setting">
-            <span className="adv-set" onClick={this.handleShowAdv}>
-              <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
-                <Icon type="setting" />
-              </Tooltip>
-            </span>
-            <span className="delete-item" onClick={this.handleDeleteItem}>
-              <Icon type="close" className="close" />
-            </span>
-            {value.type === 'object' ? (
-              <DropPlus prefix={prefix} name={name} />
-            ) : (
-              <span onClick={this.handleAddField}>
-                <Tooltip placement="top" title={LocaleProvider('add_sibling_node')}>
-                  <Icon type="plus" className="plus" />
-                </Tooltip>
-              </span>
-            )}
-          </Col>
+          {
+            !noDescription && (
+              <Col span={layput.description} className="col-item col-item-desc">
+                <Input
+                  addonAfter={<Icon type="edit" onClick={() => this.handleShowEdit('description')} />}
+                  placeholder={LocaleProvider('description')}
+                  value={value.description}
+                  onChange={this.handleChangeDesc}
+                />
+              </Col>
+            )
+          }
+          {
+            !readOnly && (
+              <Col span={3} className="col-item col-item-setting">
+                <span className="adv-set" onClick={this.handleShowAdv}>
+                  <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
+                    <Icon type="setting" />
+                  </Tooltip>
+                </span>
+                <span className="delete-item" onClick={this.handleDeleteItem}>
+                  <Icon type="close" className="close" />
+                </span>
+                {value.type === 'object' ? (
+                  <DropPlus prefix={prefix} name={name} />
+                ) : (
+                  <span onClick={this.handleAddField}>
+                    <Tooltip placement="top" title={LocaleProvider('add_sibling_node')}>
+                      <Icon type="plus" className="plus" />
+                    </Tooltip>
+                  </span>
+                )}
+              </Col>
+            )
+          }
         </Row>
-        <div className="option-formStyle">{mapping(prefixArray, value, showEdit, showAdv)}</div>
+        <div className="option-formStyle">
+          {mapping({
+            name: prefixArray,
+            data: value,
+            showEdit,
+            showAdv,
+            checkedTip,
+            radio,
+            readOnly,
+            noDescription
+          })}
+        </div>
       </div>
     ) : null;
   }
@@ -431,7 +532,11 @@ class SchemaItem extends PureComponent {
 SchemaItem.contextTypes = {
   getOpenValue: PropTypes.func,
   Model: PropTypes.object,
-  isMock: PropTypes.bool
+  isMock: PropTypes.bool,
+  checkedTip: PropTypes.string,
+  radio: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  noDescription: PropTypes.bool
 };
 
 class SchemaObjectComponent extends Component {
@@ -447,7 +552,7 @@ class SchemaObjectComponent extends Component {
   }
 
   render() {
-    const { data, prefix, showEdit, showAdv } = this.props;
+    const { data, prefix, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = this.props;
     return (
       <div className="object-style">
         {Object.keys(data.properties).map((name, index) => (
@@ -458,6 +563,10 @@ class SchemaObjectComponent extends Component {
             prefix={prefix}
             showEdit={showEdit}
             showAdv={showAdv}
+            checkedTip={checkedTip}
+            radio={radio}
+            readOnly={readOnly}
+            noDescription={noDescription}
           />
         ))}
       </div>
@@ -506,7 +615,17 @@ DropPlus.contextTypes = {
 };
 
 const SchemaJson = props => {
-  const item = mapping([], props.data, props.showEdit, props.showAdv);
+  const { data, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = props
+  const item = mapping({ 
+    name: [], 
+    data,
+    showEdit,
+    showAdv,
+    checkedTip,
+    radio,
+    readOnly, 
+    noDescription 
+  });
   return <div className="schema-content">{item}</div>;
 };
 

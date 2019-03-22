@@ -11,29 +11,25 @@ import {
   Icon,
   Modal,
   message,
-  Tabs,
-  AutoComplete
+  Tabs
 } from 'antd';
-const FormItem = Form.Item;
-const Option = Select.Option;
-const { TextArea } = Input;
-const TabPane = Tabs.TabPane;
 
-import './index.css';
 import AceEditor from './components/AceEditor/AceEditor.js';
 import _ from 'underscore';
 import { connect } from 'react-redux';
 import SchemaJson from './components/SchemaComponents/SchemaJson.js';
 import PropTypes from 'prop-types';
-import { SCHEMA_TYPE, debounce } from './utils.js';
+import { SCHEMA_TYPE, debounce, getData } from './utils.js';
 import handleSchema from './schema';
-const GenerateSchema = require('generate-schema/src/schemas/json.js');
-const utils = require('./utils');
 import CustomItem from './components/SchemaComponents/SchemaOther.js';
 import LocalProvider from './components/LocalProvider/index.js';
 import MockSelect from './components/MockSelect/index.js';
-
-
+import GenerateSchema from 'generate-schema/src/schemas/json.js';
+import './index.css';
+const FormItem = Form.Item;
+const Option = Select.Option;
+const { TextArea } = Input;
+const TabPane = Tabs.TabPane;
 
 class jsonSchema extends React.Component {
   constructor(props) {
@@ -94,7 +90,7 @@ class jsonSchema extends React.Component {
     }
   }
 
-  componentWillMount() {
+  componentWillMount () {
     let data = this.props.data;
     if (!data) {
       data = `{
@@ -109,7 +105,7 @@ class jsonSchema extends React.Component {
   getChildContext() {
     return {
       getOpenValue: keys => {
-        return utils.getData(this.props.open, keys);
+        return getData(this.props.open, keys);
       },
       changeCustomValue: this.changeCustomValue,
       Model: this.props.Model,
@@ -267,11 +263,29 @@ class jsonSchema extends React.Component {
       checked,
       editorModalName
     } = this.state;
-    const { schema } = this.props;
-
+    const { schema, checkedTip, radio, readOnly, noDescription, isMock } = this.props;
+    // console.log(checkedTip, 'checkedTip')
     let disabled =
       this.props.schema.type === 'object' || this.props.schema.type === 'array' ? false : true;
 
+    // 全部都有
+    let layput = {
+      name: 10,
+      type: 3,
+      mock: 4,
+      description: 4,
+      setting: 3
+    }
+    // 无mock 
+    if (!isMock && !noDescription && !readOnly) {
+      layput.name = 12
+      layput.description = 6
+    }
+    // 无描述，无操作
+    if (isMock && noDescription && readOnly) {
+      layput.name = 12
+      layput.mock = 9
+    }
     return (
       <div className="json-schema-react-editor">
         <Button className="import-json-button" type="primary" onClick={this.showModal}>
@@ -372,7 +386,7 @@ class jsonSchema extends React.Component {
           )}
           <Col span={this.props.showEditor ? 16 : 24} className="wrapper object-style">
             <Row type="flex" align="middle">
-              <Col span={this.props.isMock ? 10 : 12} className="col-item name-item col-item-name">
+              <Col span={layput.name} className="col-item name-item col-item-name">
                 <Row type="flex" justify="space-around" align="middle">
                   <Col span={2} className="down-style-col">
                     {schema.type === 'object' ? (
@@ -388,13 +402,15 @@ class jsonSchema extends React.Component {
                   <Col span={22}>
                     <Input
                       addonAfter={
-                        <Tooltip placement="top" title={'checked_all'}>
-                          <Checkbox
-                            checked={checked}
-                            disabled={disabled}
-                            onChange={e => this.changeCheckBox(e.target.checked)}
-                          />
-                        </Tooltip>
+                        !readOnly && (
+                          <Tooltip placement="top" title={ LocalProvider('checked_all')}>
+                            <Checkbox
+                              checked={checked}
+                              disabled={disabled || radio}
+                              onChange={e => this.changeCheckBox(e.target.checked)}
+                            />
+                          </Tooltip>
+                        )
                       }
                       disabled
                       value="root"
@@ -402,11 +418,12 @@ class jsonSchema extends React.Component {
                   </Col>
                 </Row>
               </Col>
-              <Col span={4} className="col-item col-item-type">
+              <Col span={layput.type} className="col-item col-item-type">
                 <Select
                   className="type-select-style"
                   onChange={e => this.changeType(`type`, e)}
                   value={schema.type || 'object'}
+                  disabled={readOnly}
                 >
                   {SCHEMA_TYPE.map((item, index) => {
                     return (
@@ -417,8 +434,8 @@ class jsonSchema extends React.Component {
                   })}
                 </Select>
               </Col>
-              {this.props.isMock && (
-                <Col span={3} className="col-item col-item-mock">
+              {isMock && (
+                <Col span={layput.mock} className="col-item col-item-mock">
                   <MockSelect
                     schema={schema}
                     showEdit={() => this.showEdit([], 'mock', schema.mock, schema.type)}
@@ -426,38 +443,48 @@ class jsonSchema extends React.Component {
                   />
                 </Col>
               )}
-              <Col span={this.props.isMock ? 4 : 5} className="col-item col-item-desc">
-                <Input
-                  addonAfter={
-                    <Icon
-                      type="edit"
-                      onClick={() =>
-                        this.showEdit([], 'description', this.props.schema.description)
+              {
+                !noDescription && (
+                  <Col span={layput.description} className="col-item col-item-desc">
+                    <Input
+                      addonAfter={
+                        <Icon
+                          type="edit"
+                          onClick={() =>
+                            this.showEdit([], 'description', this.props.schema.description)
+                          }
+                        />
                       }
+                      placeholder={LocalProvider('description')}
+                      value={schema.description}
+                      onChange={e => this.changeValue(['description'], e.target.value)}
                     />
-                  }
-                  placeholder={'description'}
-                  value={schema.description}
-                  onChange={e => this.changeValue(['description'], e.target.value)}
-                />
-              </Col>
-              <Col span={3} className="col-item col-item-setting">
-                <span className="adv-set" onClick={() => this.showAdv([], this.props.schema)}>
-                  <Tooltip placement="top" title={LocalProvider('adv_setting')}>
-                    <Icon type="setting" />
-                  </Tooltip>
-                </span>
-                {schema.type === 'object' ? (
-                  <span onClick={() => this.addChildField('properties')}>
-                    <Tooltip placement="top" title={LocalProvider('add_child_node')}>
-                      <Icon type="plus" className="plus" />
+                  </Col>
+                )
+              }
+              {!readOnly && (
+                <Col span={3} className="col-item col-item-setting">
+                  <span className="adv-set" onClick={() => this.showAdv([], this.props.schema)}>
+                    <Tooltip placement="top" title={LocalProvider('adv_setting')}>
+                      <Icon type="setting" />
                     </Tooltip>
                   </span>
-                ) : null}
-              </Col>
+                  {schema.type === 'object' ? (
+                    <span onClick={() => this.addChildField('properties')}>
+                      <Tooltip placement="top" title={LocalProvider('add_child_node')}>
+                        <Icon type="plus" className="plus" />
+                      </Tooltip>
+                    </span>
+                  ) : null}
+                </Col>
+              )}
             </Row>
             {this.state.show && (
               <SchemaJson
+                radio={radio}
+                checkedTip={checkedTip}
+                readOnly={readOnly}
+                noDescription={noDescription}
                 data={this.props.schema}
                 showEdit={this.showEdit}
                 showAdv={this.showAdv}

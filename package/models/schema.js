@@ -1,7 +1,8 @@
-const _ = require('underscore');
+import _ from 'underscore';
 import utils from '../utils';
-let fieldNum = 1;
 import handleSchema from '../schema.js';
+
+let fieldNum = 1;
 
 export default {
   state: {
@@ -109,7 +110,11 @@ export default {
         utils.setData(state.data, parentKeys, requiredData);
       }
     } else if (action.required && index === -1) {
-      requiredData.push(action.name);
+      if (action.radio) {
+        requiredData = [action.name]
+      } else {
+        requiredData.push(action.name);
+      }
       parentKeys.push('required');
       utils.setData(state.data, parentKeys, requiredData);
     }

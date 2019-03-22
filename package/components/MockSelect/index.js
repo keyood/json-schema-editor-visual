@@ -1,8 +1,9 @@
 import React from 'react';
 import { Input, AutoComplete, Icon } from 'antd';
 import PropTypes from 'prop-types';
-const Option = AutoComplete.Option;
 import LocaleProvider from '../LocalProvider/index.js';
+
+const Option = AutoComplete.Option;
 
 export default class MockSelect extends React.Component {
   constructor(props, context) {
@@ -28,6 +29,7 @@ export default class MockSelect extends React.Component {
       <div>
         <AutoComplete
           className="certain-category-search"
+          style={{width: '100%'}}
           dropdownMatchSelectWidth={false}
           dataSource={children}
           placeholder={LocaleProvider('mock')}
