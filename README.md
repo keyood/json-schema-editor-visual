@@ -32,5 +32,9 @@ render(
 | name | type | default | desc
 | ---- | ----------- | --------- | --------- |
 | `data` | string | null | the data of editor
-| `onChange`| function | null | 
-| `showEditor` | boolean | false | 
+| `checkedTip`| string | null |checkbox 自定义提示 |
+| `radio`| boolean | false | checkbox 单选功能 |
+| `readOnly`| boolean | false |不能添加删除表单项，不能修改key, 但是支持输入value | 
+| `noDescription`| boolean | false |没有描述 |
+| `onChange`| function | null | |
+| `showEditor` | boolean | false | 显示schema的编辑框 |

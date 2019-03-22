@@ -19,7 +19,7 @@ import _ from 'underscore';
 import { connect } from 'react-redux';
 import SchemaJson from './components/SchemaComponents/SchemaJson.js';
 import PropTypes from 'prop-types';
-import { SCHEMA_TYPE, debounce, getData } from './utils.js';
+import { SCHEMA_TYPE, debounce, getData, formLayout } from './utils.js';
 import handleSchema from './schema';
 import CustomItem from './components/SchemaComponents/SchemaOther.js';
 import LocalProvider from './components/LocalProvider/index.js';
@@ -269,23 +269,7 @@ class jsonSchema extends React.Component {
       this.props.schema.type === 'object' || this.props.schema.type === 'array' ? false : true;
 
     // 全部都有
-    let layput = {
-      name: 10,
-      type: 3,
-      mock: 4,
-      description: 4,
-      setting: 3
-    }
-    // 无mock 
-    if (!isMock && !noDescription && !readOnly) {
-      layput.name = 12
-      layput.description = 6
-    }
-    // 无描述，无操作
-    if (isMock && noDescription && readOnly) {
-      layput.name = 12
-      layput.mock = 9
-    }
+    const layput = formLayout(isMock, noDescription, readOnly)
     return (
       <div className="json-schema-react-editor">
         <Button className="import-json-button" type="primary" onClick={this.showModal}>
@@ -501,7 +485,11 @@ jsonSchema.childContextTypes = {
   getOpenValue: PropTypes.func,
   changeCustomValue: PropTypes.func,
   Model: PropTypes.object,
-  isMock: PropTypes.bool
+  isMock: PropTypes.bool,
+  checkedTip: PropTypes.string,
+  radio: PropTypes.bool,
+  readOnly: PropTypes.bool, 
+  noDescription: PropTypes.bool
 };
 
 jsonSchema.propTypes = {
@@ -509,7 +497,11 @@ jsonSchema.propTypes = {
   onChange: PropTypes.func,
   showEditor: PropTypes.bool,
   isMock: PropTypes.bool,
-  Model: PropTypes.object
+  Model: PropTypes.object,
+  checkedTip: PropTypes.string,
+  radio: PropTypes.bool,
+  readOnly: PropTypes.bool, 
+  noDescription: PropTypes.bool
 };
 
 export default connect(state => ({

@@ -1,14 +1,13 @@
-import React from 'react';
-import { render } from 'react-dom';
-import { Provider } from 'react-redux';
-import { combineReducers, createStore, applyMiddleware } from 'redux';
-import 'antd/dist/antd.css';
+import React from 'react'
+import { render } from 'react-dom'
+import 'antd/dist/antd.css'
 
-if (process.env.NODE_ENV !== 'production') {
-  window.Perf = require('react-addons-perf');
-}
-//import '../dist/main.css'
-const jeditor = require('../package/index.js');
+// if (process.env.NODE_ENV !== 'production') {
+//   window.Perf = require('react-addons-perf')
+// }
+// import '../dist/main.css'
+const jeditor = require('../package/index.js')
+// const jeditor = require('../dist/main.js')
 const mock = [
   { name: '字符串', mock: '@string' },
   { name: '自然数', mock: '@natural' },
@@ -24,47 +23,23 @@ const mock = [
   { name: '时间戳', mock: '@timestamp' }
 ];
 
-const JEditor1 = jeditor({mock: mock});
-
+const JEditor = jeditor({mock: mock, lang: 'zh_CN'})
+const data = '{"$schema":"http://json-schema.org/draft-04/schema#","type":"object","required":["result_code"],"properties":{"result_message":{"type":"string","properties":{}},"data":{"type":"string","properties":{}},"result_code":{"type":"integer","properties":{}}}}'
 render(
   <div>
-    <a target="_blank" href="https://github.com/YMFE/json-schema-editor-visual">
-      <h1>JSON-Schema-Editor</h1>
-    </a>
-    <p style={{ fontSize: '16px' }}>
-      A json-schema editor of high efficient and easy-to-use, base on React.{' '}
-      <a target="_blank" href="https://github.com/YMFE/json-schema-editor-visual">
-        Github
-      </a>
-    </p>
-    <br />
-    <h3>
-      该工具已被用于开源接口管理平台：{' '}
-      <a target="_blank" href="https://github.com/ymfe/yapi">
-        YApi
-      </a>
-    </h3>
-
-    <br />
     <h2>Example:</h2>
     <hr />
-
-    <JEditor1
-      showEditor={true}
-      isMock={true}
-      data={''}
+    <JEditor
+      showEditor
+      isMock
+      // radio
+      // readOnly
+      // noDescription
+      data={data}
       onChange={e => {
-        console.log('changeValue', e);
+        console.log('changeValue', e)
       }}
     />
-
-    {/* <JEditor2
-      showEditor={true}
-      data={null}
-      onChange={e => {
-        // console.log("changeValue", e);
-      }}
-    /> */}
   </div>,
   document.getElementById('root')
 );

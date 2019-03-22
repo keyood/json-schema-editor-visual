@@ -18,7 +18,7 @@ import FieldInput from './FieldInput'
 import _ from 'underscore';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { JSONPATH_JOIN_CHAR, SCHEMA_TYPE } from '../../utils.js';
+import { JSONPATH_JOIN_CHAR, SCHEMA_TYPE, formLayout } from '../../utils.js';
 import LocaleProvider from '../LocalProvider/index.js';
 import MockSelect from '../MockSelect/index.js';
 import './schemaJson.css';
@@ -138,30 +138,14 @@ class SchemaArray extends PureComponent {
 
     let prefixArrayStr = [].concat(prefixArray, 'properties').join(JSONPATH_JOIN_CHAR);
     let showIcon = this.context.getOpenValue([prefixArrayStr]);
-    // 全部都有
-    let layput = {
-      name: 10,
-      type: 3,
-      mock: 4,
-      description: 4,
-      setting: 3
-    }
-    // 无mock 
-    if (!this.context.isMock && !noDescription && !readOnly) {
-      layput.name = 12
-      layput.description = 6
-    }
-    // 无描述，无操作
-    if (this.context.isMock && noDescription && readOnly) {
-      layput.name = 12
-      layput.mock = 9
-    }
+    const layout = formLayout(this.context.isMock, noDescription, readOnly);
+
     return (
       !_.isUndefined(data.items) && (
         <div className="array-type">
           <Row className="array-item-type" type="flex" justify="space-around" align="middle">
             <Col
-              span={layput.name}
+              span={layout.name}
               className="col-item name-item col-item-name"
               style={this.__tagPaddingLeftStyle}
             >
@@ -182,7 +166,7 @@ class SchemaArray extends PureComponent {
                 </Col>
               </Row>
             </Col>
-            <Col span={layput.type} className="col-item col-item-type">
+            <Col span={layout.type} className="col-item col-item-type">
               <Select
                 name="itemtype"
                 className="type-select-style"
@@ -200,7 +184,7 @@ class SchemaArray extends PureComponent {
               </Select>
             </Col>
             {this.context.isMock && (
-              <Col span={layput.mock} className="col-item col-item-mock">
+              <Col span={layout.mock} className="col-item col-item-mock">
                 
                 <MockSelect
                   schema={items}
@@ -211,7 +195,7 @@ class SchemaArray extends PureComponent {
             )}
             {
               !noDescription && (
-                <Col span={layput.description} className="col-item col-item-desc">
+                <Col span={layout.description} className="col-item col-item-desc">
                   <Input
                     addonAfter={<Icon type="edit" onClick={() => this.handleShowEdit('description')} />}
                     placeholder={LocaleProvider('description')}
@@ -223,7 +207,7 @@ class SchemaArray extends PureComponent {
             }
             {
               !readOnly && (
-                <Col span={3} className="col-item col-item-setting">
+                <Col span={layout.setting} className="col-item col-item-setting">
                   <span className="adv-set" onClick={this.handleShowAdv}>
                     <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
                       <Icon type="setting" />
@@ -378,29 +362,13 @@ class SchemaItem extends PureComponent {
     let prefixArrayStr = [].concat(prefixArray, 'properties').join(JSONPATH_JOIN_CHAR);
     let show = this.context.getOpenValue([prefixStr]);
     let showIcon = this.context.getOpenValue([prefixArrayStr]);
-    // 全部都有
-    let layput = {
-      name: 10,
-      type: 3,
-      mock: 4,
-      description: 4,
-      setting: 3
-    }
-    // 无mock 
-    if (!this.context.isMock && !noDescription && !readOnly) {
-      layput.name = 12
-      layput.description = 6
-    }
-    // 无描述，无操作
-    if (this.context.isMock && noDescription && readOnly) {
-      layput.name = 12
-      layput.mock = 9
-    }
+    const layout = formLayout(this.context.isMock, noDescription, readOnly);
+
     return show ? (
       <div>
         <Row type="flex" justify="space-around" align="middle">
           <Col
-            span={layput.name}
+            span={layout.name}
             className="col-item name-item col-item-name"
             style={this.__tagPaddingLeftStyle}
           >
@@ -439,7 +407,7 @@ class SchemaItem extends PureComponent {
           </Col>
 
 
-          <Col span={3} className="col-item col-item-type">
+          <Col span={layout.type} className="col-item col-item-type">
             <Select
               className="type-select-style"
               onChange={this.handleChangeType}
@@ -458,7 +426,7 @@ class SchemaItem extends PureComponent {
 
 
           {this.context.isMock && (
-            <Col span={layput.mock} className="col-item col-item-mock">
+            <Col span={layout.mock} className="col-item col-item-mock">
               {/* <Input
                 addonAfter={
                   <Icon type="edit" onClick={() => this.handleShowEdit('mock', value.type)} />
@@ -478,7 +446,7 @@ class SchemaItem extends PureComponent {
 
           {
             !noDescription && (
-              <Col span={layput.description} className="col-item col-item-desc">
+              <Col span={layout.description} className="col-item col-item-desc">
                 <Input
                   addonAfter={<Icon type="edit" onClick={() => this.handleShowEdit('description')} />}
                   placeholder={LocaleProvider('description')}

@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import utils from '../utils';
+import * as utils from '../utils';
 import handleSchema from '../schema.js';
 
 let fieldNum = 1;

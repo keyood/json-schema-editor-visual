@@ -1,7 +1,6 @@
-const JSONPATH_JOIN_CHAR = '.';
-exports.JSONPATH_JOIN_CHAR = JSONPATH_JOIN_CHAR;
-exports.lang = 'en_US';
-exports.format = [
+export const JSONPATH_JOIN_CHAR = '.';
+export const lang = 'en_US';
+export const format = [
   { name: 'date-time' },
   { name: 'date' },
   { name: 'email' },
@@ -10,9 +9,8 @@ exports.format = [
   { name: 'ipv6' },
   { name: 'uri' }
 ];
-const _ = require('underscore');
-exports.SCHEMA_TYPE = ['string', 'number', 'array', 'object', 'boolean', 'integer'];
-exports.defaultSchema = {
+export const SCHEMA_TYPE = ['string', 'number', 'array', 'object', 'boolean', 'integer'];
+export const defaultSchema = {
   string: {
     type: 'string'
   },
@@ -41,7 +39,7 @@ exports.defaultSchema = {
 // 请在 constructor 里使用:
 
 // this.func = debounce(this.func, 400);
-exports.debounce = (func, wait) => {
+export function debounce (func, wait) {
   let timeout;
   return function() {
     clearTimeout(timeout);
@@ -49,7 +47,7 @@ exports.debounce = (func, wait) => {
   };
 };
 
-function getData(state, keys) {
+export function getData(state, keys) {
   let curState = state;
   for (let i = 0; i < keys.length; i++) {
     curState = curState[keys[i]];
@@ -57,9 +55,7 @@ function getData(state, keys) {
   return curState;
 }
 
-exports.getData = getData;
-
-exports.setData = function(state, keys, value) {
+export function setData (state, keys, value) {
   let curState = state;
   for (let i = 0; i < keys.length - 1; i++) {
     curState = curState[keys[i]];
@@ -67,7 +63,7 @@ exports.setData = function(state, keys, value) {
   curState[keys[keys.length - 1]] = value;
 };
 
-exports.deleteData = function(state, keys) {
+export function deleteData (state, keys) {
   let curState = state;
   for (let i = 0; i < keys.length - 1; i++) {
     curState = curState[keys[i]];
@@ -76,14 +72,14 @@ exports.deleteData = function(state, keys) {
   delete curState[keys[keys.length - 1]];
 };
 
-exports.getParentKeys = function(keys) {
+export function getParentKeys (keys) {
   if (keys.length === 1) return [];
   let arr = [].concat(keys);
   arr.splice(keys.length - 1, 1);
   return arr;
 };
 
-exports.clearSomeFields = function(keys, data) {
+export function clearSomeFields (keys, data) {
   const newData = Object.assign({}, data);
   keys.forEach(key => {
     delete newData[key];
@@ -91,7 +87,7 @@ exports.clearSomeFields = function(keys, data) {
   return newData;
 };
 
-function getFieldstitle(data) {
+export function getFieldstitle(data) {
   const requiredtitle = [];
   Object.keys(data).map(title => {
     requiredtitle.push(title);
@@ -100,7 +96,7 @@ function getFieldstitle(data) {
   return requiredtitle;
 }
 
-function handleSchemaRequired(schema, checked) {
+export function handleSchemaRequired(schema, checked) {
   // console.log(schema)
   if (schema.type === 'object') {
     let requiredtitle = getFieldstitle(schema.properties);
@@ -120,16 +116,14 @@ function handleSchemaRequired(schema, checked) {
   }
 }
 
-function handleObject(properties, checked) {
+export function handleObject(properties, checked) {
   for (var key in properties) {
     if (properties[key].type === 'array' || properties[key].type === 'object')
       handleSchemaRequired(properties[key], checked);
   }
 }
 
-exports.handleSchemaRequired = handleSchemaRequired;
-
-function cloneObject(obj) {
+export function cloneObject(obj) {
   if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
       var newArr = [];
@@ -149,4 +143,89 @@ function cloneObject(obj) {
   }
 }
 
-exports.cloneObject = cloneObject;
+export function formLayout (isMock, noDescription, readOnly) {
+  // 全部都有
+  let layout = {
+    name: 10, // name
+    type: 3, // 类型
+    mock: 4, // 描述
+    description: 4, // 描述
+    setting: 3 // 操作
+  }
+
+  // 无mock
+  if (!isMock && !noDescription && !readOnly) {
+    layout = {
+      name: 12,
+      type: 3,
+      mock: 0,
+      description: 6,
+      setting: 3
+    }
+  }
+
+  // 无操作
+  if (isMock && !noDescription && readOnly) {
+    layout = {
+      name: 11,
+      type: 3,
+      mock: 5,
+      description: 5,
+      setting: 0
+    }
+  }
+  // 无描述
+  if (isMock && noDescription && !readOnly) {
+    layout = {
+      name: 12,
+      type: 3,
+      mock: 6,
+      description: 0,
+      setting: 3
+    }
+  }
+  // 无mock，无操作
+  if (!isMock && !noDescription && readOnly) {
+    layout = {
+      name: 12,
+      type: 3,
+      mock: 0,
+      description: 9,
+      setting: 0
+    }
+  }
+
+  // 无描述，无操作
+  if (isMock && noDescription && readOnly) {
+    layout = {
+      name: 12,
+      type: 3,
+      mock: 9,
+      description: 0,
+      setting: 0
+    }
+  }
+
+  // 无描述，无mock
+  if (!isMock && noDescription && !readOnly) {
+    layout = {
+      name: 13,
+      type: 8,
+      mock: 0,
+      description: 0,
+      setting: 3
+    }
+  }
+
+  // 无mock 无描述，无操作
+  if (!isMock && noDescription && readOnly) {
+    layout = {
+      name: 18,
+      type: 6,
+      mock: 0,
+      description: 0,
+      setting: 0
+    }
+  }
+  return layout
+}
