@@ -160,14 +160,14 @@ export default {
       newPropertiesData = Object.assign({}, propertiesData);
       let ranName = 'field_' + fieldNum++;
       newPropertiesData[ranName] = utils.defaultSchema.string;
-      requiredData.push(ranName);
+      // requiredData.push(ranName);
     } else {
       for (let i in propertiesData) {
         newPropertiesData[i] = propertiesData[i];
         if (i === name) {
           let ranName = 'field_' + fieldNum++;
           newPropertiesData[ranName] = utils.defaultSchema.string;
-          requiredData.push(ranName);
+          // requiredData.push(ranName);
         }
       }
     }
@@ -191,7 +191,7 @@ export default {
     let parentKeys = utils.getParentKeys(keys);
     let parentData = utils.getData(oldData, parentKeys);
     let requiredData = [].concat(parentData.required || []);
-    requiredData.push(ranName);
+    // requiredData.push(ranName);
     parentKeys.push('required');
     utils.setData(state.data, parentKeys, requiredData);
   },
