@@ -64,7 +64,7 @@ module.exports = {
   externals: isDev ? [] : [
     { react: { commonjs: 'react', commonjs2: 'react', amd: 'react', root: ['React'] } },
     { 'react-redux': { commonjs: 'react-redux', commonjs2: 'react-redux', amd: 'react-redux' } },
-    { underscore: { commonjs: 'underscore', commonjs2: 'underscore', amd: 'underscore', root: ['_'] } },
+    { lodash: { commonjs: 'lodash', commonjs2: 'lodash', amd: 'lodash', root: ['_'] } },
     { brace: { commonjs: 'brace', commonjs2: 'brace', amd: 'brace', root: ['ace'] } },
     { moox: { commonjs: 'moox', commonjs2: 'moox', amd: 'moox' } },
     { 'react-dom': { commonjs: 'react-dom', commonjs2: 'react-dom', amd: 'react-dom', root: ['ReactDom'] } },

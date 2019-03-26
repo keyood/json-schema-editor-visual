@@ -12,7 +12,7 @@ import {
   Tooltip
 } from 'antd';
 import FieldInput from './FieldInput'
-import _ from 'underscore';
+import _ from 'lodash';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { JSONPATH_JOIN_CHAR, SCHEMA_TYPE, formLayout } from '../../utils.js';

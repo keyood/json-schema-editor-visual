@@ -15,7 +15,7 @@ import {
 } from 'antd';
 
 import AceEditor from './components/AceEditor/AceEditor.js';
-import _ from 'underscore';
+import _ from 'lodash';
 import { connect } from 'react-redux';
 import SchemaJson from './components/SchemaComponents/SchemaJson.js';
 import PropTypes from 'prop-types';

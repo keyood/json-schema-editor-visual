@@ -11,11 +11,11 @@
     "build:ykit": "ykit pack -m"
   },
   "dependencies": {
+    "brace": "^0.11.1",
     "generate-schema": "^2.6.0",
+    "lodash": "^4.17.11",
     "moox": "^1.0.2",
-    "react-redux": "^5.0.6",
-    "underscore": "^1.8.3",
-    "brace": "^0.11.1"
+    "react-redux": "^5.0.6"
   },
   "devDependencies": {
     "antd": "^3.13.2",
