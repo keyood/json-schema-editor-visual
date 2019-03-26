@@ -109,7 +109,14 @@ class jsonSchema extends React.Component {
       },
       changeCustomValue: this.changeCustomValue,
       Model: this.props.Model,
-      isMock: this.props.isMock
+      isMock: this.props.isMock,
+      checkedTip: this.props.checkedTip,
+      radio: this.props.radio,
+      readOnlyName: this.props.readOnlyName,
+      disableType: this.props.disableType,
+      noAction: this.props.noAction,
+      noCheckbox: this.props.noCheckbox,
+      noDescription: this.props.noDescription
     };
   }
 
@@ -263,13 +270,12 @@ class jsonSchema extends React.Component {
       checked,
       editorModalName
     } = this.state;
-    const { schema, checkedTip, radio, readOnly, noDescription, isMock } = this.props;
-    // console.log(checkedTip, 'checkedTip')
+    const { schema, radio, noCheckbox, disableType, noAction, noDescription, isMock } = this.props;
     let disabled =
       this.props.schema.type === 'object' || this.props.schema.type === 'array' ? false : true;
 
     // 全部都有
-    const layput = formLayout(isMock, noDescription, readOnly)
+    const layput = formLayout(isMock, noDescription, noAction)
     return (
       <div className="json-schema-react-editor">
         <Button className="import-json-button" type="primary" onClick={this.showModal}>
@@ -386,7 +392,7 @@ class jsonSchema extends React.Component {
                   <Col span={22}>
                     <Input
                       addonAfter={
-                        !readOnly && (
+                        !noCheckbox && (
                           <Tooltip placement="top" title={ LocalProvider('checked_all')}>
                             <Checkbox
                               checked={checked}
@@ -407,7 +413,7 @@ class jsonSchema extends React.Component {
                   className="type-select-style"
                   onChange={e => this.changeType(`type`, e)}
                   value={schema.type || 'object'}
-                  disabled={readOnly}
+                  disabled={disableType}
                 >
                   {SCHEMA_TYPE.map((item, index) => {
                     return (
@@ -446,7 +452,7 @@ class jsonSchema extends React.Component {
                   </Col>
                 )
               }
-              {!readOnly && (
+              {!noAction && (
                 <Col span={3} className="col-item col-item-setting">
                   <span className="adv-set" onClick={() => this.showAdv([], this.props.schema)}>
                     <Tooltip placement="top" title={LocalProvider('adv_setting')}>
@@ -465,10 +471,6 @@ class jsonSchema extends React.Component {
             </Row>
             {this.state.show && (
               <SchemaJson
-                radio={radio}
-                checkedTip={checkedTip}
-                readOnly={readOnly}
-                noDescription={noDescription}
                 data={this.props.schema}
                 showEdit={this.showEdit}
                 showAdv={this.showAdv}
@@ -488,7 +490,10 @@ jsonSchema.childContextTypes = {
   isMock: PropTypes.bool,
   checkedTip: PropTypes.string,
   radio: PropTypes.bool,
-  readOnly: PropTypes.bool, 
+  readOnlyName: PropTypes.bool,
+  disableType: PropTypes.bool,
+  noAction: PropTypes.bool,
+  noCheckbox: PropTypes.bool,
   noDescription: PropTypes.bool
 };
 
@@ -500,7 +505,10 @@ jsonSchema.propTypes = {
   Model: PropTypes.object,
   checkedTip: PropTypes.string,
   radio: PropTypes.bool,
-  readOnly: PropTypes.bool, 
+  readOnlyName: PropTypes.bool,
+  disableType: PropTypes.bool,
+  noAction: PropTypes.bool,
+  noCheckbox: PropTypes.bool,
   noDescription: PropTypes.bool
 };
 

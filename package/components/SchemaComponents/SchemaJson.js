@@ -4,13 +4,10 @@ import {
   Menu,
   Row,
   Col,
-  Form,
   Select,
   Checkbox,
-  Button,
   Icon,
   Input,
-  Modal,
   message,
   Tooltip
 } from 'antd';
@@ -23,13 +20,10 @@ import LocaleProvider from '../LocalProvider/index.js';
 import MockSelect from '../MockSelect/index.js';
 import './schemaJson.css';
 
-const FormItem = Form.Item;
 const Option = Select.Option;
-const { TextArea } = Input;
-const InputGroup = Input.Group;
 
-  const mapping = props => {
-  const { name, data, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = props
+const mapping = props => {
+  const { name, data, showEdit, showAdv } = props
   switch (data.type) {
     case 'array':
       return (
@@ -38,10 +32,6 @@ const InputGroup = Input.Group;
           data={data}
           showEdit={showEdit}
           showAdv={showAdv}
-          checkedTip={checkedTip}
-          radio={radio}
-          readOnly={readOnly}
-          noDescription={noDescription}
         />
       );
       break;
@@ -53,10 +43,6 @@ const InputGroup = Input.Group;
           data={data}
           showEdit={showEdit}
           showAdv={showAdv}
-          checkedTip={checkedTip}
-          radio={radio}
-          readOnly={readOnly}
-          noDescription={noDescription}
         />
       );
       break;
@@ -132,13 +118,28 @@ class SchemaArray extends PureComponent {
   };
 
   render() {
-    const { data, prefix, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = this.props;
+    const {
+      data,
+      prefix,
+      showEdit,
+      showAdv
+    } = this.props;
+    const {
+      isMock,
+      checkedTip,
+      radio,
+      readOnlyName,
+      disableType,
+      noAction,
+      noCheckbox,
+      noDescription
+    } = this.context;
     const items = data.items;
     let prefixArray = [].concat(prefix, 'items');
 
     let prefixArrayStr = [].concat(prefixArray, 'properties').join(JSONPATH_JOIN_CHAR);
     let showIcon = this.context.getOpenValue([prefixArrayStr]);
-    const layout = formLayout(this.context.isMock, noDescription, readOnly);
+    const layout = formLayout(isMock, noDescription, noAction);
 
     return (
       !_.isUndefined(data.items) && (
@@ -162,7 +163,7 @@ class SchemaArray extends PureComponent {
                   ) : null}
                 </Col>
                 <Col span={22}>
-                  <Input addonAfter={<Checkbox disabled />} disabled value="Items" />
+                  <Input addonAfter={<Checkbox disabled />} readOnly={readOnlyName} value="Items" />
                 </Col>
               </Row>
             </Col>
@@ -172,7 +173,7 @@ class SchemaArray extends PureComponent {
                 className="type-select-style"
                 onChange={this.handleChangeType}
                 value={items.type}
-                disabled={readOnly}
+                disabled={disableType}
               >
                 {SCHEMA_TYPE.map((item, index) => {
                   return (
@@ -183,7 +184,7 @@ class SchemaArray extends PureComponent {
                 })}
               </Select>
             </Col>
-            {this.context.isMock && (
+            {isMock && (
               <Col span={layout.mock} className="col-item col-item-mock">
                 
                 <MockSelect
@@ -206,7 +207,7 @@ class SchemaArray extends PureComponent {
               )
             }
             {
-              !readOnly && (
+              !noAction && (
                 <Col span={layout.setting} className="col-item col-item-setting">
                   <span className="adv-set" onClick={this.handleShowAdv}>
                     <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
@@ -230,11 +231,7 @@ class SchemaArray extends PureComponent {
               name: prefixArray,
               data: items,
               showEdit,
-              showAdv,
-              checkedTip,
-              radio,
-              readOnly,
-              noDescription
+              showAdv
             })}
           </div>
         </div>
@@ -249,7 +246,10 @@ SchemaArray.contextTypes = {
   isMock: PropTypes.bool,
   checkedTip: PropTypes.string,
   radio: PropTypes.bool,
-  readOnly: PropTypes.bool,
+  readOnlyName: PropTypes.bool,
+  disableType: PropTypes.bool,
+  noAction: PropTypes.bool,
+  noCheckbox: PropTypes.bool,
   noDescription: PropTypes.bool
 };
 
@@ -310,7 +310,8 @@ class SchemaItem extends PureComponent {
 
   // 删除节点
   handleDeleteItem = () => {
-    const { prefix, name, radio } = this.props;
+    const { radio } = this.context;
+    const { prefix, name } = this.props;
     let nameArray = this.getPrefix();
     this.Model.deleteItemAction({ key: nameArray });
     this.Model.enableRequireAction({ prefix, name, required: false, radio });
@@ -348,21 +349,38 @@ class SchemaItem extends PureComponent {
 
   // 修改是否必须
   handleEnableRequire = e => {
-    const { prefix, name, radio } = this.props;
+    const { radio } = this.context;
+    const { prefix, name } = this.props;
     let required = e.target.checked;
     // this.enableRequire(this.props.prefix, this.props.name, e.target.checked);
     this.Model.enableRequireAction({ prefix, name, required, radio });
   };
 
   render() {
-    let { name, data, prefix, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = this.props;
+    const {
+      isMock,
+      checkedTip,
+      radio,
+      readOnlyName,
+      disableType,
+      noAction,
+      noCheckbox,
+      noDescription
+    } = this.context;
+    const {
+      name,
+      data,
+      prefix,
+      showEdit,
+      showAdv
+    } = this.props;
     let value = data.properties[name];
     let prefixArray = [].concat(prefix, name);
     let prefixStr = prefix.join(JSONPATH_JOIN_CHAR);
     let prefixArrayStr = [].concat(prefixArray, 'properties').join(JSONPATH_JOIN_CHAR);
     let show = this.context.getOpenValue([prefixStr]);
     let showIcon = this.context.getOpenValue([prefixArrayStr]);
-    const layout = formLayout(this.context.isMock, noDescription, readOnly);
+    const layout = formLayout(isMock, noDescription, noAction);
 
     return show ? (
       <div>
@@ -387,7 +405,7 @@ class SchemaItem extends PureComponent {
               <Col span={22}>
                 <FieldInput
                   addonAfter={
-                    !readOnly && (
+                    !noCheckbox && (
                       <Tooltip placement="top" title={checkedTip || LocaleProvider('required')}>
                         <Checkbox
                           onChange={this.handleEnableRequire}
@@ -400,7 +418,7 @@ class SchemaItem extends PureComponent {
                   }
                   onChange={this.handleChangeName}
                   value={name}
-                  disabled={readOnly}
+                  disabled={readOnlyName}
                 />
               </Col>
             </Row>
@@ -412,7 +430,7 @@ class SchemaItem extends PureComponent {
               className="type-select-style"
               onChange={this.handleChangeType}
               value={value.type}
-              disabled={readOnly}
+              disabled={disableType}
             >
               {SCHEMA_TYPE.map((item, index) => {
                 return (
@@ -425,7 +443,7 @@ class SchemaItem extends PureComponent {
           </Col>
 
 
-          {this.context.isMock && (
+          {isMock && (
             <Col span={layout.mock} className="col-item col-item-mock">
               {/* <Input
                 addonAfter={
@@ -457,7 +475,7 @@ class SchemaItem extends PureComponent {
             )
           }
           {
-            !readOnly && (
+            !noAction && (
               <Col span={3} className="col-item col-item-setting">
                 <span className="adv-set" onClick={this.handleShowAdv}>
                   <Tooltip placement="top" title={LocaleProvider('adv_setting')}>
@@ -485,11 +503,7 @@ class SchemaItem extends PureComponent {
             name: prefixArray,
             data: value,
             showEdit,
-            showAdv,
-            checkedTip,
-            radio,
-            readOnly,
-            noDescription
+            showAdv
           })}
         </div>
       </div>
@@ -503,7 +517,10 @@ SchemaItem.contextTypes = {
   isMock: PropTypes.bool,
   checkedTip: PropTypes.string,
   radio: PropTypes.bool,
-  readOnly: PropTypes.bool,
+  readOnlyName: PropTypes.bool,
+  disableType: PropTypes.bool,
+  noAction: PropTypes.bool,
+  noCheckbox: PropTypes.bool,
   noDescription: PropTypes.bool
 };
 
@@ -520,21 +537,22 @@ class SchemaObjectComponent extends Component {
   }
 
   render() {
-    const { data, prefix, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = this.props;
+    const {
+      data,
+      prefix,
+      showEdit,
+      showAdv
+    } = this.props
     return (
       <div className="object-style">
         {Object.keys(data.properties).map((name, index) => (
           <SchemaItem
             key={index}
-            data={this.props.data}
+            data={data}
             name={name}
             prefix={prefix}
             showEdit={showEdit}
             showAdv={showAdv}
-            checkedTip={checkedTip}
-            radio={radio}
-            readOnly={readOnly}
-            noDescription={noDescription}
           />
         ))}
       </div>
@@ -583,16 +601,12 @@ DropPlus.contextTypes = {
 };
 
 const SchemaJson = props => {
-  const { data, showEdit, showAdv, checkedTip, radio, readOnly, noDescription } = props
+  const { data, showEdit, showAdv } = props
   const item = mapping({ 
     name: [], 
     data,
     showEdit,
-    showAdv,
-    checkedTip,
-    radio,
-    readOnly, 
-    noDescription 
+    showAdv
   });
   return <div className="schema-content">{item}</div>;
 };
